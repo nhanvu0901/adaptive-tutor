@@ -107,10 +107,16 @@ class LearnerStore:
     def archive_session(self, topic, markdown, date=None):
         if not isinstance(markdown, str):
             raise ValueError("session archive must be markdown text")
-        archive_date = date or date_type.today()
-        if isinstance(archive_date, date_type):
-            archive_date = archive_date.isoformat()
-        if not isinstance(archive_date, str):
+        if date is None:
+            archive_date = date_type.today().isoformat()
+        elif isinstance(date, date_type):
+            archive_date = date.isoformat()
+        elif isinstance(date, str):
+            try:
+                archive_date = date_type.fromisoformat(date).isoformat()
+            except ValueError as error:
+                raise ValueError("session date must be an ISO calendar date") from error
+        else:
             raise ValueError("session date must be a date or ISO date string")
         path = self.root / "sessions" / f"{archive_date}-{self._slug(topic)}.md"
         self._atomic_write_text(path, markdown)

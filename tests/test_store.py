@@ -41,3 +41,18 @@ class StoreTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             store.load_learner()
         self.assertEqual(path.read_text(encoding="utf-8"), "not-json")
+
+    def test_archive_session_accepts_an_iso_date(self):
+        root = temp_root(self)
+        path = LearnerStore(root).archive_session("NLP Basics", "# Notes", "2026-01-01")
+        self.assertEqual(path, root / "sessions" / "2026-01-01-nlp-basics.md")
+        self.assertEqual(path.read_text(encoding="utf-8"), "# Notes")
+
+    def test_archive_session_rejects_traversal_dates_without_writing(self):
+        root = temp_root(self)
+        store = LearnerStore(root)
+        for archive_date in ("../../x", "2026-01-01/../x"):
+            with self.subTest(archive_date=archive_date):
+                with self.assertRaises(ValueError):
+                    store.archive_session("topic", "# Notes", archive_date)
+        self.assertFalse((root / "sessions").exists())
