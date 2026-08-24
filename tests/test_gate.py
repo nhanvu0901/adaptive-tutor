@@ -114,6 +114,19 @@ class GatePreferenceTests(unittest.TestCase):
         )
         self.assertNotIn("candidate_preferences", result)
 
+    def test_three_same_delta_signals_promote_one_preference(self):
+        entry = self.preference_delta(confidence=0.70)["preferences"][0]
+        result = gate_delta(
+            {"schema_version": 1, "preferences": [entry, entry.copy(), entry.copy()]},
+            learner_state(),
+            {},
+        )
+        self.assertEqual(
+            result["preferences"],
+            [{"key": "systems_concepts", "strategy": "visual_first", "confidence": 0.70}],
+        )
+        self.assertNotIn("candidate_preferences", result)
+
     def test_explicit_preference_promotes_immediately(self):
         result = gate_delta(
             self.preference_delta(evidence_type="explicit_preference", confidence=0.4), learner_state(), {}

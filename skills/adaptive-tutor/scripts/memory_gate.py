@@ -52,23 +52,33 @@ def _accept_mastery(entry, mastery_by_domain):
 
 
 def _gate_preferences(entries, learner):
-    confirmed, candidates = [], []
-    existing = learner.get("candidate_preferences", {})
+    confirmed = []
+    working = deepcopy(learner.get("candidate_preferences", {}))
+    candidates = {}
+    confirmed_keys = set()
     for entry in entries:
+        key = entry["key"]
         if entry["evidence_type"] == "explicit_preference":
             confirmed.append({
-                "key": entry["key"], "strategy": entry["value"], "confidence": entry["confidence"],
+                "key": key, "strategy": entry["value"], "confidence": entry["confidence"],
             })
+            confirmed_keys.add(key)
+            candidates.pop(key, None)
             continue
 
-        prior = existing.get(entry["key"], {})
+        if key in confirmed_keys:
+            continue
+        prior = working.get(key, {})
         count = prior.get("evidence_count", 0) + 1
         confidence = max(prior.get("confidence", 0.0), entry["confidence"])
+        working[key] = {"evidence_count": count, "confidence": confidence}
         if count >= PREFERENCE_EVIDENCE_COUNT and confidence >= PREFERENCE_CONFIDENCE:
-            confirmed.append({"key": entry["key"], "strategy": entry["value"], "confidence": confidence})
+            confirmed.append({"key": key, "strategy": entry["value"], "confidence": confidence})
+            confirmed_keys.add(key)
+            candidates.pop(key, None)
         else:
-            candidates.append({"key": entry["key"], "evidence_count": count, "confidence": confidence})
-    return confirmed, candidates
+            candidates[key] = {"key": key, "evidence_count": count, "confidence": confidence}
+    return confirmed, list(candidates.values())
 
 
 def gate_delta(delta, learner, mastery_by_domain):
