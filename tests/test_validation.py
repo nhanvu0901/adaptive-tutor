@@ -83,3 +83,41 @@ class ValidationTests(unittest.TestCase):
             with self.subTest(field=field):
                 with self.assertRaises(ValidationError):
                     validate_delta({"schema_version": 1, field: {}})
+
+    def test_delta_requires_to_as_the_canonical_mastery_target(self):
+        with self.assertRaises(ValidationError):
+            validate_delta({
+                "schema_version": 1,
+                "mastery": [{
+                    "domain": "nlp",
+                    "concept": "attention",
+                    "state": "can_apply",
+                    "confidence": 0.8,
+                    "evidence_type": "application",
+                    "strength": "strong",
+                }],
+            })
+
+    def test_malformed_state_and_evidence_values_raise_validation_error(self):
+        with self.assertRaises(ValidationError):
+            validate_mastery({
+                "schema_version": 1,
+                "domain": "nlp",
+                "concepts": {"attention": {"state": [], "confidence": 0.8}},
+            })
+        with self.assertRaises(ValidationError):
+            validate_delta({
+                "schema_version": 1,
+                "mastery": [{
+                    "domain": "nlp",
+                    "concept": "attention",
+                    "to": "can_apply",
+                    "confidence": 0.8,
+                    "evidence_type": {},
+                    "strength": "strong",
+                }],
+            })
+
+    def test_delta_rejects_boolean_schema_version(self):
+        with self.assertRaises(ValidationError):
+            validate_delta({"schema_version": True})

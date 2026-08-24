@@ -18,11 +18,10 @@
     "mastery": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["domain", "concept", "confidence", "evidence_type", "strength"],
+      "required": ["domain", "concept", "to", "confidence", "evidence_type", "strength"],
       "properties": {
         "domain": {"type": "string", "minLength": 1},
         "concept": {"type": "string", "minLength": 1},
-        "state": {"$ref": "#/$defs/state"},
         "from": {"$ref": "#/$defs/state"},
         "to": {"$ref": "#/$defs/state"},
         "confidence": {"type": "number", "minimum": 0, "maximum": 1},
@@ -30,8 +29,7 @@
         "strength": {"$ref": "#/$defs/strength"},
         "max_hint_level": {"type": "integer", "minimum": 0, "maximum": 6},
         "verified_at": {"type": "string", "minLength": 1}
-      },
-      "anyOf": [{"required": ["state"]}, {"required": ["to"]}]
+      }
     },
     "misconception": {
       "type": "object",

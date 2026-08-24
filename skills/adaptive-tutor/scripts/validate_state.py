@@ -41,8 +41,15 @@ def _require_confidence(value, label):
         raise ValidationError(f"{label} must be between 0 and 1")
 
 
+def _require_schema_version(value, label):
+    if isinstance(value, bool) or not isinstance(value, int) or value != 1:
+        raise ValidationError(f"unsupported {label} schema_version")
+
+
 def _validate_evidence(entry, label):
     _require_keys(entry, ["evidence_type", "strength"], label)
+    _require_string(entry["evidence_type"], f"{label} evidence_type")
+    _require_string(entry["strength"], f"{label} strength")
     if entry["evidence_type"] not in EVIDENCE_RANK:
         raise ValidationError(f"{label} has invalid evidence_type")
     if entry["strength"] not in STRENGTH_RANK:
@@ -57,12 +64,12 @@ def validate_learner(data):
     ]
     _require_keys(data, required, "learner")
     _reject_unknown_keys(data, required, "learner")
-    if data["schema_version"] != 1:
-        raise ValidationError("unsupported learner schema_version")
+    _require_schema_version(data["schema_version"], "learner")
     if not isinstance(data["permissions"], dict):
         raise ValidationError("learner permissions must be an object")
     for host, decision in data["permissions"].items():
         _require_string(host, "permission host")
+        _require_string(decision, f"permission for {host}")
         if decision == "allow_once":
             raise ValidationError("allow_once is session-only and cannot be persisted")
         if decision not in PERMISSIONS:
@@ -100,8 +107,7 @@ def validate_mastery(data):
     required = ["schema_version", "domain", "concepts"]
     _require_keys(data, required, "mastery")
     _reject_unknown_keys(data, required, "mastery")
-    if data["schema_version"] != 1:
-        raise ValidationError("unsupported mastery schema_version")
+    _require_schema_version(data["schema_version"], "mastery")
     _require_string(data["domain"], "mastery domain")
     if not isinstance(data["concepts"], dict):
         raise ValidationError("mastery concepts must be an object")
@@ -110,6 +116,7 @@ def validate_mastery(data):
         _require_mapping(record, f"mastery concept {concept}")
         _require_keys(record, ["state", "confidence"], f"mastery concept {concept}")
         _reject_unknown_keys(record, ["state", "confidence", "last_verified", "evidence"], f"mastery concept {concept}")
+        _require_string(record["state"], f"mastery concept {concept} state")
         if record["state"] not in STATE_RANK:
             raise ValidationError(f"invalid state for {concept}")
         _require_confidence(record["confidence"], f"mastery concept {concept} confidence")
@@ -124,6 +131,7 @@ def _validate_mastery_evidence(evidence, concept):
     _require_mapping(evidence, f"mastery concept {concept} evidence")
     _require_keys(evidence, ["strongest_type", "count"], f"mastery concept {concept} evidence")
     _reject_unknown_keys(evidence, ["strongest_type", "count", "max_hint_level"], f"mastery concept {concept} evidence")
+    _require_string(evidence["strongest_type"], f"mastery concept {concept} strongest_type")
     if evidence["strongest_type"] not in EVIDENCE_RANK:
         raise ValidationError(f"invalid evidence type for {concept}")
     count = evidence["count"]
@@ -140,8 +148,7 @@ def validate_delta(data):
     allowed = ["schema_version", "mastery", "misconceptions", "preferences", "profile"]
     _require_keys(data, ["schema_version"], "delta")
     _reject_unknown_keys(data, allowed, "delta")
-    if data["schema_version"] != 1:
-        raise ValidationError("unsupported delta schema_version")
+    _require_schema_version(data["schema_version"], "delta")
     for field in ("mastery", "misconceptions", "preferences", "profile"):
         if field in data:
             _require_list(data[field], f"delta {field}")
@@ -160,16 +167,15 @@ def _validate_mastery_delta(entry):
     _require_mapping(entry, "mastery delta entry")
     required = ["domain", "concept", "confidence", "evidence_type", "strength"]
     _require_keys(entry, required, "mastery delta entry")
-    _reject_unknown_keys(entry, required + ["state", "from", "to", "max_hint_level", "verified_at"], "mastery delta entry")
+    _reject_unknown_keys(entry, required + ["from", "to", "max_hint_level", "verified_at"], "mastery delta entry")
     _require_string(entry["domain"], "mastery delta domain")
     _require_string(entry["concept"], "mastery delta concept")
-    if "state" not in entry and "to" not in entry:
-        raise ValidationError("mastery delta entry missing state or to")
-    for field in ("state", "to", "from"):
+    _require_keys(entry, ["to"], "mastery delta entry")
+    for field in ("to", "from"):
+        if field in entry:
+            _require_string(entry[field], f"mastery delta entry {field}")
         if field in entry and entry[field] not in STATE_RANK:
             raise ValidationError(f"mastery delta entry has invalid {field}")
-    if "state" in entry and "to" in entry and entry["state"] != entry["to"]:
-        raise ValidationError("mastery delta entry state and to must match")
     _require_confidence(entry["confidence"], "mastery delta confidence")
     _validate_evidence(entry, "mastery delta entry")
     if "max_hint_level" in entry:
@@ -185,6 +191,7 @@ def _validate_misconception_delta(entry):
     _require_keys(entry, ["concept", "status"], "misconception delta entry")
     _reject_unknown_keys(entry, ["concept", "status"], "misconception delta entry")
     _require_string(entry["concept"], "misconception delta concept")
+    _require_string(entry["status"], "misconception delta status")
     if entry["status"] not in {"discovered", "corrected"}:
         raise ValidationError("misconception delta status must be discovered or corrected")
 
@@ -206,6 +213,7 @@ def _validate_profile_delta(entry):
     _require_mapping(entry, "profile delta entry")
     _require_keys(entry, ["field", "value", "source"], "profile delta entry")
     _reject_unknown_keys(entry, ["field", "value", "source"], "profile delta entry")
+    _require_string(entry["field"], "profile delta field")
     if entry["field"] not in {"goals", "interests", "background", "constraints"}:
         raise ValidationError("profile delta entry has invalid field")
     _require_string(entry["source"], "profile delta source")
