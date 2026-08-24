@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Adaptive Tutor Learner Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "permissions", "goals", "interests", "background", "preferences", "candidate_preferences", "constraints"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "permissions": {
+      "type": "object",
+      "additionalProperties": {"enum": ["allow_and_remember", "deny"]}
+    },
+    "goals": {"type": "array"},
+    "interests": {"type": "array"},
+    "background": {"type": "array"},
+    "preferences": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["strategy", "confidence"],
+        "properties": {
+          "strategy": {"type": "string", "minLength": 1},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "candidate_preferences": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["evidence_count", "confidence"],
+        "properties": {
+          "evidence_count": {"type": "integer", "minimum": 0},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "constraints": {"type": "object"}
+  }
+}
