@@ -1,7 +1,9 @@
 import copy
 import unittest
 
-from skills.adaptive_tutor.scripts.merge_delta import merge_learner, merge_mastery
+from skills.adaptive_tutor.scripts.learner_store import LearnerStore
+from skills.adaptive_tutor.scripts.merge_delta import apply_checkpoint, merge_learner, merge_mastery
+from tests.helpers import temp_root
 
 
 def learner_state(**overrides):
@@ -71,3 +73,33 @@ class MergeTests(unittest.TestCase):
 
         self.assertEqual(merge_learner(learner, {"schema_version": 1}), original)
         self.assertEqual(learner, original)
+
+    def test_persistence_failure_leaves_profile_and_mastery_unchanged(self):
+        root = temp_root(self)
+        initial_store = LearnerStore(root)
+        initial_store.load_learner()
+        initial_store.save_mastery("nlp", {
+            "schema_version": 1, "domain": "nlp", "concepts": {},
+        })
+        learner_path = root / "LEARNER.yaml"
+        mastery_path = root / "mastery" / "nlp.yaml"
+        learner_before = learner_path.read_bytes()
+        mastery_before = mastery_path.read_bytes()
+
+        class FailingMasteryStore(LearnerStore):
+            def save_mastery(self, domain, data):
+                raise OSError("simulated mastery write failure")
+
+        delta = {"schema_version": 1, "profile": [{
+            "field": "goals", "value": "learn NLP", "source": "explicit_user",
+        }], "mastery": [{
+            "domain": "nlp", "concept": "embeddings", "to": "can_explain",
+            "confidence": 0.8, "evidence_type": "explanation", "strength": "strong",
+            "max_hint_level": 1,
+        }]}
+
+        with self.assertRaisesRegex(OSError, "simulated mastery write failure"):
+            apply_checkpoint(FailingMasteryStore(root), delta)
+
+        self.assertEqual(learner_path.read_bytes(), learner_before)
+        self.assertEqual(mastery_path.read_bytes(), mastery_before)

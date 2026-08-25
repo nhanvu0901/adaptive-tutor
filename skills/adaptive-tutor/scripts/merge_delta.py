@@ -102,6 +102,34 @@ def _summary(before_learner, after_learner, mastery_before, mastery_after):
             "misconceptions": misconceptions, "written": written}
 
 
+def _restore_file(path, contents):
+    if contents is None:
+        if path.exists():
+            path.unlink()
+        return
+    temporary = path.with_suffix(path.suffix + ".rollback")
+    temporary.write_bytes(contents)
+    temporary.replace(path)
+
+
+def _persist_all_or_rollback(store, learner_before, learner_after, mastery_before, mastery_after):
+    writes = []
+    if learner_before != learner_after:
+        writes.append((store.learner_path, lambda: store.save_learner(learner_after)))
+    for domain, mastery in mastery_after.items():
+        if mastery != mastery_before[domain]:
+            writes.append((store._mastery_path(domain),
+                           lambda domain=domain, mastery=mastery: store.save_mastery(domain, mastery)))
+    snapshots = {path: path.read_bytes() if path.exists() else None for path, _ in writes}
+    try:
+        for _, write in writes:
+            write()
+    except Exception:
+        for path, contents in snapshots.items():
+            _restore_file(path, contents)
+        raise
+
+
 def apply_checkpoint(store, delta, dry_run=False):
     """Validate, gate, merge, validate again, and atomically persist a checkpoint."""
     validate_delta(delta)
@@ -121,11 +149,7 @@ def apply_checkpoint(store, delta, dry_run=False):
         validate_mastery(mastery)
     summary = _summary(learner, merged_learner, mastery_before, mastery_after)
     if not dry_run and summary["written"]:
-        if learner != merged_learner:
-            store.save_learner(merged_learner)
-        for domain, mastery in mastery_after.items():
-            if mastery != mastery_before[domain]:
-                store.save_mastery(domain, mastery)
+        _persist_all_or_rollback(store, learner, merged_learner, mastery_before, mastery_after)
     if dry_run:
         summary["written"] = False
     return summary
