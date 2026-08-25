@@ -7,6 +7,8 @@ tutoring. It contains `adaptive-tutor`, which runs the lesson workflow, and
 `learn-verify`, which verifies uncertain or material factual claims before they
 are taught as fact. V1 is terminal-native and works with Claude Code and Codex.
 
+For background, see the [referenced YouTube video](https://www.youtube.com/watch?v=kzcI5F4tGiU&t=797s).
+
 ## Why it differs from a normal AI tutor
 
 The tutor calibrates rather than trusting a claimed level, builds a dynamic
