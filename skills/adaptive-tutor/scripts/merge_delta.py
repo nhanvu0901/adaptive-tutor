@@ -97,7 +97,11 @@ def _summary(before_learner, after_learner, mastery_before, mastery_after):
         for domain in mastery_after
     }
     mastery_concepts = {domain: concepts for domain, concepts in mastery_concepts.items() if concepts}
-    written = bool(profile_fields or mastery_concepts or misconceptions)
+    preferences_changed = (
+        before_learner["preferences"] != after_learner["preferences"]
+        or before_learner["candidate_preferences"] != after_learner["candidate_preferences"]
+    )
+    written = bool(profile_fields or mastery_concepts or misconceptions or preferences_changed)
     return {"profile_fields": profile_fields, "mastery_concepts": mastery_concepts,
             "misconceptions": misconceptions, "written": written}
 
