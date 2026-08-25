@@ -89,3 +89,22 @@ class SkillContractTests(unittest.TestCase):
         ):
             self.assertIn(level, PEDAGOGY)
         self.assertIn("Hint dependence weakens evidence", PEDAGOGY)
+
+    def test_runtime_instructions_cover_native_interaction_and_verification(self):
+        """Catch removal of picker fallbacks or verification verdicts from the runtime."""
+        runtime_instructions = "\n".join((SKILL, PEDAGOGY))
+        for requirement in (
+            "AskUserQuestion",
+            "ask_user_question",
+            "plain-text fallback",
+            "confirmed",
+            "qualified",
+            "contradicted",
+            "unknown",
+        ):
+            self.assertIn(requirement, runtime_instructions)
+
+    def test_mcq_alone_cannot_promote_higher_mastery_tiers(self):
+        """Catch treating recognition evidence as sufficient for higher-order mastery."""
+        for tier in ("can_explain", "can_apply", "can_transfer"):
+            self.assertIn(f"MCQ cannot by itself promote to `{tier}`", SKILL)

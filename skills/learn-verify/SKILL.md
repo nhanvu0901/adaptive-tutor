@@ -5,4 +5,14 @@ description: Verify a factual claim before it is taught as fact. Use for uncerta
 
 # Learn Verify
 
-Turn the teaching claim into a falsifiable claim, inspect authoritative sources when tools permit, and return one of: confirmed, qualified, contradicted, unknown.
+Use this verification sequence for an uncertain or material teaching claim:
+
+```text
+claim -> make falsifiable -> authoritative/primary source search -> compare evidence -> verdict -> safe teaching form
+```
+
+Load `references/source-policy.md` before searching. Turn the result into one
+safe teaching form and return exactly one verdict: `confirmed`, `qualified`,
+`contradicted`, or `unknown`. An `unknown` result has insufficient trustworthy
+evidence and must not be taught as fact. This skill verifies claims only; it does
+not import or apply external learner profiles, teaching behavior, or preferences.

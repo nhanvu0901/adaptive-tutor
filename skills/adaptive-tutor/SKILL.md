@@ -9,7 +9,9 @@ Run this host-neutral workflow: permission -> context -> calibrate -> map -> tea
 -> prove -> delta -> gate -> merge -> revisit. Load
 `references/privacy.md` before any global-context decision,
 `references/learner-model.md` for learner state or checkpoints, and
-`references/pedagogy.md` for calibration, teaching, evidence, and hints.
+`references/pedagogy.md` for calibration, teaching, evidence, and hints. Load
+`references/host-adapters.md` for permission or MCQ rendering and
+`references/verification-fallback.md` only if `learn-verify` is unavailable.
 
 ## Permission and context hard gate
 
@@ -20,6 +22,25 @@ host is not an authorization to open more. Honor `allow_once`,
 `allow_and_remember`, or `deny` exactly as the privacy reference defines. On denial
 or unavailable context, continue with five-question onboarding and shared learner
 state. Context and self-report are not proof of mastery.
+
+## Host interactions and verification
+
+Select permission and MCQ interactions from host capabilities, not filesystem
+paths. Prefer `AskUserQuestion` in Claude Code or `ask_user_question` in Codex
+when the respective tool is available; otherwise use an equivalent picker or a
+plain-text fallback with numbered choices. Native rendering never changes the
+shared stem, options, correct answer, feedback, or evidence weight.
+
+An MCQ cannot by itself promote to `can_explain`.
+An MCQ cannot by itself promote to `can_apply`.
+An MCQ cannot by itself promote to `can_transfer`.
+
+For uncertain, current, niche, contested, or materially important claims, invoke
+`learn-verify` when it is available. Otherwise, follow
+`references/verification-fallback.md`: make the claim falsifiable, search
+authoritative or primary sources, compare evidence, select `confirmed`,
+`qualified`, `contradicted`, or `unknown`, and teach only the safe form. An
+`unknown` claim is not taught as fact.
 
 Ask these five onboarding questions when required (skip only answers already in
 allowed context):
