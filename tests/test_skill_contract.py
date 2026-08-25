@@ -3,6 +3,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = (ROOT / "skills/adaptive-tutor/SKILL.md").read_text(encoding="utf-8")
+PRIVACY = (ROOT / "skills/adaptive-tutor/references/privacy.md").read_text(encoding="utf-8")
+LEARNER_MODEL = (ROOT / "skills/adaptive-tutor/references/learner-model.md").read_text(
+    encoding="utf-8"
+)
+PEDAGOGY = (ROOT / "skills/adaptive-tutor/references/pedagogy.md").read_text(encoding="utf-8")
 
 
 class SkillContractTests(unittest.TestCase):
@@ -22,3 +27,65 @@ class SkillContractTests(unittest.TestCase):
 
     def test_teaching_is_one_node_at_a_time(self):
         self.assertIn("one unresolved node", SKILL.lower())
+
+    def test_privacy_reference_has_exact_permission_request(self):
+        self.assertIn(
+            "I can use your existing Claude/Codex global context to understand your "
+            "background, interests, and prior knowledge so I can personalize how I teach "
+            "you. I will use this information only for learning personalization. May I read it?",
+            PRIVACY,
+        )
+
+    def test_privacy_reference_has_all_permission_transitions(self):
+        for transition in (
+            "allow_once          -> read for this learning session; do not persist permission",
+            "allow_and_remember  -> read; persist only permission decision",
+            "deny                -> do not read; start/continue with onboarding + shared learner state",
+        ):
+            self.assertIn(transition, PRIVACY)
+
+    def test_privacy_reference_prevents_global_context_copying(self):
+        privacy = " ".join(PRIVACY.lower().split())
+        self.assertIn("do not copy global files into learner storage.", privacy)
+        self.assertIn("extract only learning-relevant signals", privacy)
+        self.assertIn("discard unrelated or sensitive data.", privacy)
+
+    def test_skill_has_exact_five_question_onboarding(self):
+        for question in (
+            "What do you want to be able to do after learning this topic?",
+            "What have you already studied, built, or used that is related to it?",
+            "What level do you think you are at, and what is one example that supports that estimate?",
+            "What subjects, projects, or interests should I use for examples when helpful?",
+            "How do you prefer to learn: pace, language, intuition vs. math, code vs. theory, and amount of practice?",
+        ):
+            self.assertIn(question, SKILL)
+
+    def test_learner_model_reference_has_tiers_and_checkpoint_rules(self):
+        for tier in ("Tier 1 — Learner Profile", "Tier 2 — Mastery Index", "Tier 3 — Session Archive"):
+            self.assertIn(tier, LEARNER_MODEL)
+        self.assertIn("pending evidence buffer", LEARNER_MODEL)
+        self.assertIn("semantic checkpoint", LEARNER_MODEL.lower())
+        self.assertIn("Do not persist after every prompt", LEARNER_MODEL)
+
+    def test_pedagogy_reference_has_full_evidence_loop(self):
+        self.assertIn(
+            "CONTEXT -> CALIBRATE -> MAP -> TEACH -> PROVE -> DELTA -> GATE -> MERGE -> REVISIT",
+            PEDAGOGY,
+        )
+        self.assertIn(
+            "connect -> minimal explanation -> retrieval/explanation -> application -> "
+            "transfer when appropriate -> evidence -> checkpoint",
+            PEDAGOGY,
+        )
+
+    def test_pedagogy_reference_has_six_hint_levels(self):
+        for level in (
+            "1. restate the goal/question",
+            "2. small cue",
+            "3. targeted hint",
+            "4. partial scaffold",
+            "5. worked sub-example",
+            "6. full explanation",
+        ):
+            self.assertIn(level, PEDAGOGY)
+        self.assertIn("Hint dependence weakens evidence", PEDAGOGY)
