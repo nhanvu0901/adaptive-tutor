@@ -1,4 +1,5 @@
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -34,8 +35,10 @@ class PackagingTests(unittest.TestCase):
             r"`((?:references|scripts|assets)/[^`\s>]+)`", skill_text
         )
         self.assertTrue(runtime_paths, "SKILL.md should name its runtime files")
+        skill_root = skill_dir.resolve()
         for relative_path in runtime_paths:
-            path = skill_dir / relative_path
+            path = (skill_dir / relative_path).resolve()
+            self.assertTrue(path.is_relative_to(skill_root), path)
             self.assertTrue(path.is_file(), path)
 
     def test_merge_delta_help_runs_from_an_arbitrary_working_directory(self):
@@ -43,6 +46,24 @@ class PackagingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as working_directory:
             result = subprocess.run(
                 [sys.executable, str(script), "--help"],
+                cwd=working_directory,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("usage:", result.stdout)
+
+    def test_copied_merge_delta_help_is_self_contained(self):
+        source_skill = ROOT / "skills" / "adaptive-tutor"
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            isolated_root = Path(temporary_directory)
+            copied_skill = isolated_root / "installed" / "adaptive-tutor"
+            shutil.copytree(source_skill, copied_skill)
+            working_directory = isolated_root / "elsewhere"
+            working_directory.mkdir()
+            result = subprocess.run(
+                [sys.executable, "-B", str(copied_skill / "scripts" / "merge_delta.py"), "--help"],
                 cwd=working_directory,
                 text=True,
                 capture_output=True,

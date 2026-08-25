@@ -2,7 +2,10 @@
 
 from copy import deepcopy
 
-from .model import EVIDENCE_RANK, STATE_RANK
+if __package__ in (None, ""):
+    from model import EVIDENCE_RANK, STATE_RANK
+else:
+    from .model import EVIDENCE_RANK, STATE_RANK
 
 
 REQUIRED_EVIDENCE = {

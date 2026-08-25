@@ -8,16 +8,16 @@ from pathlib import Path
 
 
 if __package__ in (None, ""):
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-
-from skills.adaptive_tutor.scripts.learner_store import DEFAULT_LEARNER, LearnerStore
-from skills.adaptive_tutor.scripts.memory_gate import gate_delta
-from skills.adaptive_tutor.scripts.model import EVIDENCE_RANK
-from skills.adaptive_tutor.scripts.validate_state import (
-    validate_delta,
-    validate_learner,
-    validate_mastery,
-)
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from learner_store import DEFAULT_LEARNER, LearnerStore
+    from memory_gate import gate_delta
+    from model import EVIDENCE_RANK
+    from validate_state import validate_delta, validate_learner, validate_mastery
+else:
+    from .learner_store import DEFAULT_LEARNER, LearnerStore
+    from .memory_gate import gate_delta
+    from .model import EVIDENCE_RANK
+    from .validate_state import validate_delta, validate_learner, validate_mastery
 
 
 MAX_EVIDENCE_COUNT = 3

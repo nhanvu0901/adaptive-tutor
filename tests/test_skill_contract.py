@@ -11,9 +11,15 @@ PEDAGOGY = (ROOT / "skills/adaptive-tutor/references/pedagogy.md").read_text(enc
 
 
 class SkillContractTests(unittest.TestCase):
-    def test_permission_precedes_global_context_read(self):
-        self.assertIn("before reading any global", SKILL.lower())
-        self.assertIn("only for learning personalization", SKILL.lower())
+    def test_permission_gate_precedes_active_global_context_read(self):
+        skill = SKILL.lower()
+        gate_start = skill.index("## permission and context hard gate")
+        gate = " ".join(skill[gate_start:].split())
+        ask_index = gate.index("ask the exact permission request")
+        no_read_index = gate.index("do not actively open global files")
+        self.assertLess(ask_index, no_read_index)
+        self.assertIn("before reading any global claude/codex context or memory", gate)
+        self.assertIn("only for learning personalization", gate)
 
     def test_denial_has_onboarding_fallback(self):
         self.assertIn("five-question onboarding", SKILL.lower())

@@ -6,8 +6,12 @@ from copy import deepcopy
 from datetime import date as date_type
 from pathlib import Path
 
-from .model import PERMISSIONS
-from .validate_state import validate_learner, validate_mastery
+if __package__ in (None, ""):
+    from model import PERMISSIONS
+    from validate_state import validate_learner, validate_mastery
+else:
+    from .model import PERMISSIONS
+    from .validate_state import validate_learner, validate_mastery
 
 
 DEFAULT_LEARNER = {

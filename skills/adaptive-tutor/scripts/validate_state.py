@@ -1,6 +1,9 @@
 """Dependency-free validation for durable learner state and lesson deltas."""
 
-from .model import EVIDENCE_RANK, PERMISSIONS, STATE_RANK, STRENGTH_RANK
+if __package__ in (None, ""):
+    from model import EVIDENCE_RANK, PERMISSIONS, STATE_RANK, STRENGTH_RANK
+else:
+    from .model import EVIDENCE_RANK, PERMISSIONS, STATE_RANK, STRENGTH_RANK
 
 
 class ValidationError(ValueError):
