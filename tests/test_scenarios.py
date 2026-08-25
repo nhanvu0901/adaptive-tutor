@@ -48,18 +48,30 @@ class V1MemoryScenarioTests(unittest.TestCase):
     def test_returning_learner_with_transfer_evidence_retains_can_transfer(self):
         root = temp_root(self)
         store = LearnerStore(root)
-        checkpoint = delta("""
+        initial_transfer = delta("""
         {"schema_version": 1, "mastery": [{
           "domain": "nlp", "concept": "embeddings", "to": "can_transfer",
           "confidence": 0.91, "evidence_type": "transfer", "strength": "strong",
           "max_hint_level": 1
         }]}
         """)
+        later_checkpoint = delta("""
+        {"schema_version": 1, "mastery": [{
+          "domain": "nlp", "concept": "attention", "to": "can_apply",
+          "confidence": 0.82, "evidence_type": "application", "strength": "strong",
+          "max_hint_level": 1
+        }]}
+        """)
 
-        summary = apply_checkpoint(store, checkpoint)
+        apply_checkpoint(store, initial_transfer)
+        returning_store = LearnerStore(root)
+        self.assertEqual(returning_store.load_mastery("nlp")["concepts"]["embeddings"]["state"],
+                         "can_transfer")
+
+        summary = apply_checkpoint(returning_store, later_checkpoint)
 
         self.assertTrue(summary["written"])
-        self.assertEqual(LearnerStore(root).load_mastery("nlp")["concepts"]["embeddings"]["state"],
+        self.assertEqual(returning_store.load_mastery("nlp")["concepts"]["embeddings"]["state"],
                          "can_transfer")
 
     def test_provisional_global_context_signal_cannot_promote_can_apply(self):
@@ -96,6 +108,9 @@ class V1MemoryScenarioTests(unittest.TestCase):
         }]}
         """)
         apply_checkpoint(store, initial)
+        self.assertEqual(store.load_learner()["preferences"], {
+            "systems_concepts": {"strategy": "visual_first", "confidence": 0.80}
+        })
 
         apply_checkpoint(store, replacement)
 
