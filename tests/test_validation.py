@@ -21,6 +21,22 @@ class ValidationTests(unittest.TestCase):
             "constraints": {},
         })
 
+    def test_candidate_preference_may_record_strategy_identity(self):
+        validate_learner({
+            "schema_version": 1,
+            "permissions": {},
+            "goals": [],
+            "interests": [],
+            "background": [],
+            "preferences": {},
+            "candidate_preferences": {
+                "systems_concepts": {
+                    "strategy": "visual_first", "evidence_count": 2, "confidence": 0.65,
+                }
+            },
+            "constraints": {},
+        })
+
     def test_allow_once_cannot_be_persisted(self):
         with self.assertRaises(ValidationError):
             validate_learner({

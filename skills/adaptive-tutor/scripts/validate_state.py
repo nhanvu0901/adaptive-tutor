@@ -98,7 +98,12 @@ def _validate_preferences(preferences, candidates):
         _require_string(key, "candidate preference key")
         _require_mapping(candidate, f"candidate preference {key}")
         _require_keys(candidate, ["evidence_count", "confidence"], f"candidate preference {key}")
-        _reject_unknown_keys(candidate, ["evidence_count", "confidence"], f"candidate preference {key}")
+        _reject_unknown_keys(
+            candidate, ["strategy", "evidence_count", "confidence"],
+            f"candidate preference {key}",
+        )
+        if "strategy" in candidate:
+            _require_string(candidate["strategy"], f"candidate preference {key} strategy")
         count = candidate["evidence_count"]
         if isinstance(count, bool) or not isinstance(count, int) or count < 0:
             raise ValidationError(f"candidate preference {key} evidence_count must be a non-negative integer")

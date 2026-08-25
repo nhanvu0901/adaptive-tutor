@@ -1,11 +1,12 @@
 """Evidence-based filtering for durable learner-memory changes."""
 
+import json
 from copy import deepcopy
 
 if __package__ in (None, ""):
-    from model import EVIDENCE_RANK, STATE_RANK
+    from model import EVIDENCE_RANK, STATE_RANK, STRENGTH_RANK
 else:
-    from .model import EVIDENCE_RANK, STATE_RANK
+    from .model import EVIDENCE_RANK, STATE_RANK, STRENGTH_RANK
 
 
 REQUIRED_EVIDENCE = {
@@ -54,43 +55,129 @@ def _accept_mastery(entry, mastery_by_domain):
     return max_hint is None or entry.get("max_hint_level", 0) <= max_hint
 
 
+def _canonical_mastery_key(entry, current_rank):
+    target_rank = STATE_RANK[entry["to"]]
+    lowers_state = target_rank < current_rank
+    canonical_json = json.dumps(entry, sort_keys=True, separators=(",", ":"))
+    if lowers_state:
+        return (
+            1,
+            entry["verified_at"],
+            -target_rank,
+            -entry["confidence"],
+            canonical_json,
+        )
+    return (
+        0,
+        target_rank,
+        entry["confidence"],
+        EVIDENCE_RANK[entry["evidence_type"]],
+        STRENGTH_RANK[entry["strength"]],
+        -entry.get("max_hint_level", 0),
+        entry.get("verified_at", ""),
+        canonical_json,
+    )
+
+
+def gate_mastery_entries(entries, mastery_by_domain):
+    """Return one deterministic, policy-compliant entry per domain/concept."""
+    grouped = {}
+    for entry in entries:
+        grouped.setdefault((entry["domain"], entry["concept"]), []).append(entry)
+
+    accepted = []
+    for domain, concept in sorted(grouped):
+        current = _current_concept(mastery_by_domain, domain, concept)
+        eligible = [
+            entry for entry in grouped[(domain, concept)]
+            if _accept_mastery(entry, mastery_by_domain)
+        ]
+        if eligible:
+            accepted.append(deepcopy(max(
+                eligible,
+                key=lambda entry: _canonical_mastery_key(
+                    entry, STATE_RANK[current["state"]]
+                ),
+            )))
+    return accepted
+
+
+def _candidate_rank(candidate):
+    return (
+        candidate["evidence_count"],
+        candidate["confidence"],
+        candidate.get("strategy", ""),
+    )
+
+
 def _gate_preferences(entries, learner):
     confirmed = []
-    working = deepcopy(learner.get("candidate_preferences", {}))
-    candidates = {}
-    confirmed_keys = set()
+    candidates = []
+    grouped = {}
     for entry in entries:
-        key = entry["key"]
-        if entry["evidence_type"] == "explicit_preference":
+        grouped.setdefault(entry["key"], []).append(entry)
+
+    stored_candidates = learner.get("candidate_preferences", {})
+    for key in sorted(grouped):
+        key_entries = grouped[key]
+        explicit = [
+            entry for entry in key_entries
+            if entry["evidence_type"] == "explicit_preference"
+        ]
+        if explicit:
+            winner = max(
+                explicit,
+                key=lambda entry: (
+                    entry["confidence"], STRENGTH_RANK[entry["strength"]], entry["value"]
+                ),
+            )
             confirmed.append({
-                "key": key, "strategy": entry["value"], "confidence": entry["confidence"],
+                "key": key, "strategy": winner["value"],
+                "confidence": winner["confidence"],
             })
-            confirmed_keys.add(key)
-            candidates.pop(key, None)
             continue
 
-        if key in confirmed_keys:
-            continue
-        prior = working.get(key, {})
-        count = prior.get("evidence_count", 0) + 1
-        confidence = max(prior.get("confidence", 0.0), entry["confidence"])
-        working[key] = {"evidence_count": count, "confidence": confidence}
-        if count >= PREFERENCE_EVIDENCE_COUNT and confidence >= PREFERENCE_CONFIDENCE:
-            confirmed.append({"key": key, "strategy": entry["value"], "confidence": confidence})
-            confirmed_keys.add(key)
-            candidates.pop(key, None)
+        by_strategy = {}
+        for entry in key_entries:
+            by_strategy.setdefault(entry["value"], []).append(entry)
+
+        prior = stored_candidates.get(key)
+        identity_candidates = []
+        for strategy in sorted(by_strategy):
+            supporting = by_strategy[strategy]
+            count = len(supporting)
+            confidence = max(entry["confidence"] for entry in supporting)
+            if prior and (
+                prior.get("strategy") == strategy
+                or ("strategy" not in prior and len(by_strategy) == 1)
+            ):
+                count += prior["evidence_count"]
+                confidence = max(confidence, prior["confidence"])
+            identity_candidates.append({
+                "key": key, "strategy": strategy,
+                "evidence_count": count, "confidence": confidence,
+            })
+
+        promotable = [candidate for candidate in identity_candidates if (
+            "strategy" in candidate
+            and candidate["evidence_count"] >= PREFERENCE_EVIDENCE_COUNT
+            and candidate["confidence"] >= PREFERENCE_CONFIDENCE
+        )]
+        if promotable:
+            winner = max(promotable, key=_candidate_rank)
+            confirmed.append({
+                "key": key, "strategy": winner["strategy"],
+                "confidence": winner["confidence"],
+            })
         else:
-            candidates[key] = {"key": key, "evidence_count": count, "confidence": confidence}
-    return confirmed, list(candidates.values())
+            candidates.append(max(identity_candidates, key=_candidate_rank))
+    return confirmed, candidates
 
 
 def gate_delta(delta, learner, mastery_by_domain):
     """Return a copy of the durable changes that pass V1 evidence policy."""
     accepted = {"schema_version": delta["schema_version"]}
-    mastery = [
-        deepcopy(entry) for entry in delta.get("mastery", [])
-        if _accept_mastery(entry, mastery_by_domain)
-    ]
+    mastery = gate_mastery_entries(delta.get("mastery", []), mastery_by_domain)
     if mastery:
         accepted["mastery"] = mastery
 

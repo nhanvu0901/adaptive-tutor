@@ -8,6 +8,16 @@ LEARNER_MODEL = (ROOT / "skills/adaptive-tutor/references/learner-model.md").rea
     encoding="utf-8"
 )
 PEDAGOGY = (ROOT / "skills/adaptive-tutor/references/pedagogy.md").read_text(encoding="utf-8")
+HOST_ADAPTERS = (ROOT / "skills/adaptive-tutor/references/host-adapters.md").read_text(
+    encoding="utf-8"
+)
+VERIFICATION_FALLBACK = (
+    ROOT / "skills/adaptive-tutor/references/verification-fallback.md"
+).read_text(encoding="utf-8")
+LEARN_VERIFY = (ROOT / "skills/learn-verify/SKILL.md").read_text(encoding="utf-8")
+SOURCE_POLICY = (ROOT / "skills/learn-verify/references/source-policy.md").read_text(
+    encoding="utf-8"
+)
 
 
 def permission_gate_section(skill):
@@ -131,6 +141,39 @@ Do not actively open global files until consent is granted.
             "unknown",
         ):
             self.assertIn(requirement, runtime_instructions)
+
+    def test_host_adapter_directly_defines_selection_and_fallback(self):
+        host_adapters = " ".join(HOST_ADAPTERS.split())
+        for requirement in (
+            "capabilities and the current host instructions",
+            "never from a filesystem path",
+            "AskUserQuestion",
+            "ask_user_question",
+            "equivalent single-choice interaction tool",
+            "plain-text fallback",
+            "Do not fail a lesson",
+            "Only after the learner grants the permission",
+        ):
+            self.assertIn(requirement, host_adapters)
+
+    def test_verification_artifacts_directly_define_every_safe_verdict(self):
+        for artifact in (VERIFICATION_FALLBACK, SOURCE_POLICY):
+            normalized = " ".join(artifact.lower().split())
+            for requirement in (
+                "`confirmed`", "evidence directly supports the claim",
+                "`qualified`", "core claim holds only with material conditions or caveats",
+                "`contradicted`", "good evidence conflicts with the claim",
+                "`unknown`", "trustworthy evidence", "insufficient",
+            ):
+                self.assertIn(requirement, normalized)
+            self.assertRegex(normalized, r"do not teach (?:it )?as fact")
+
+    def test_learn_verify_loads_source_policy_and_preserves_unknown_not_fact(self):
+        learn_verify = LEARN_VERIFY.lower()
+        self.assertIn("load `references/source-policy.md` before searching", learn_verify)
+        for verdict in ("`confirmed`", "`qualified`", "`contradicted`", "`unknown`"):
+            self.assertIn(verdict, learn_verify)
+        self.assertIn("must not be taught as fact", learn_verify)
 
     def test_mcq_alone_cannot_promote_higher_mastery_tiers(self):
         """Catch treating recognition evidence as sufficient for higher-order mastery."""

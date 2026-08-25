@@ -42,11 +42,13 @@ class MergeTests(unittest.TestCase):
             "systems_concepts": {"evidence_count": 1, "confidence": 0.55}
         })
         result = merge_learner(learner, {"schema_version": 1, "candidate_preferences": [{
-            "key": "systems_concepts", "evidence_count": 2, "confidence": 0.65,
+            "key": "systems_concepts", "strategy": "visual_first",
+            "evidence_count": 2, "confidence": 0.65,
         }]})
 
         self.assertEqual(result["candidate_preferences"]["systems_concepts"],
-                         {"evidence_count": 2, "confidence": 0.65})
+                         {"strategy": "visual_first", "evidence_count": 2,
+                          "confidence": 0.65})
 
     def test_confirmed_preference_removes_candidate(self):
         result = merge_learner(learner_state(candidate_preferences={
@@ -103,3 +105,24 @@ class MergeTests(unittest.TestCase):
 
         self.assertEqual(learner_path.read_bytes(), learner_before)
         self.assertEqual(mastery_path.read_bytes(), mastery_before)
+
+    def test_checkpoint_duplicate_mastery_entries_cannot_downgrade_by_list_order(self):
+        stronger = {
+            "domain": "nlp", "concept": "embeddings", "to": "can_apply",
+            "confidence": 0.86, "evidence_type": "application", "strength": "strong",
+            "max_hint_level": 1,
+        }
+        weaker = {
+            "domain": "nlp", "concept": "embeddings", "to": "can_explain",
+            "confidence": 0.78, "evidence_type": "explanation", "strength": "strong",
+            "max_hint_level": 1,
+        }
+        results = []
+        for entries in ([stronger, weaker], [weaker, stronger]):
+            root = temp_root(self)
+            store = LearnerStore(root)
+            apply_checkpoint(store, {"schema_version": 1, "mastery": entries})
+            results.append(store.load_mastery("nlp")["concepts"]["embeddings"])
+
+        self.assertEqual(results[0], results[1])
+        self.assertEqual(results[0]["state"], "can_apply")

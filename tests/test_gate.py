@@ -82,6 +82,49 @@ class GateMasteryTests(unittest.TestCase):
         )
         self.assertEqual(result["mastery"][0]["confidence"], 0.45)
 
+    def test_duplicate_mastery_promotions_consolidate_to_strongest_state(self):
+        weaker = mastery_delta(
+            to="can_explain", confidence=0.78, evidence_type="explanation"
+        )["mastery"][0]
+        stronger = mastery_delta(
+            to="can_apply", confidence=0.86, evidence_type="application"
+        )["mastery"][0]
+
+        forward = gate_delta(
+            {"schema_version": 1, "mastery": [stronger, weaker]},
+            learner_state(),
+            {"nlp": mastery_state()},
+        )
+        reverse = gate_delta(
+            {"schema_version": 1, "mastery": [weaker, stronger]},
+            learner_state(),
+            {"nlp": mastery_state()},
+        )
+
+        self.assertEqual(forward, reverse)
+        self.assertEqual(len(forward["mastery"]), 1)
+        self.assertEqual(forward["mastery"][0]["to"], "can_apply")
+
+    def test_lower_state_requires_verified_strong_contradiction(self):
+        current = mastery_state(concepts={
+            "embeddings": {"state": "can_apply", "confidence": 0.9}
+        })
+        unverified = mastery_delta(
+            to="exposed", confidence=0.3, evidence_type="contradiction", strength="strong"
+        )
+        verified = mastery_delta(
+            to="exposed", confidence=0.3, evidence_type="contradiction", strength="strong",
+            verified_at="2026-08-24",
+        )
+
+        self.assertNotIn(
+            "mastery", gate_delta(unverified, learner_state(), {"nlp": current})
+        )
+        self.assertEqual(
+            gate_delta(verified, learner_state(), {"nlp": current})["mastery"][0]["to"],
+            "exposed",
+        )
+
 
 class GatePreferenceTests(unittest.TestCase):
     def preference_delta(self, **overrides):
@@ -100,7 +143,10 @@ class GatePreferenceTests(unittest.TestCase):
         self.assertNotIn("preferences", result)
         self.assertEqual(
             result["candidate_preferences"],
-            [{"key": "systems_concepts", "evidence_count": 1, "confidence": 0.65}],
+            [{
+                "key": "systems_concepts", "strategy": "visual_first",
+                "evidence_count": 1, "confidence": 0.65,
+            }],
         )
 
     def test_third_supporting_signal_promotes_candidate(self):
@@ -113,6 +159,49 @@ class GatePreferenceTests(unittest.TestCase):
             [{"key": "systems_concepts", "strategy": "visual_first", "confidence": 0.75}],
         )
         self.assertNotIn("candidate_preferences", result)
+
+    def test_distinct_inferred_strategies_do_not_combine_or_depend_on_order(self):
+        visual = self.preference_delta(confidence=0.70)["preferences"][0]
+        worked = self.preference_delta(
+            value="worked_examples", confidence=0.72
+        )["preferences"][0]
+
+        forward = gate_delta(
+            {"schema_version": 1, "preferences": [visual, visual.copy(), worked]},
+            learner_state(),
+            {},
+        )
+        reverse = gate_delta(
+            {"schema_version": 1, "preferences": [worked, visual, visual.copy()]},
+            learner_state(),
+            {},
+        )
+
+        self.assertEqual(forward, reverse)
+        self.assertNotIn("preferences", forward)
+        self.assertEqual(forward["candidate_preferences"], [{
+            "key": "systems_concepts", "strategy": "visual_first",
+            "evidence_count": 2, "confidence": 0.70,
+        }])
+
+    def test_new_strategy_starts_separate_candidate_from_prior_strategy(self):
+        learner = learner_state(candidate_preferences={
+            "systems_concepts": {
+                "strategy": "visual_first", "evidence_count": 2, "confidence": 0.70,
+            }
+        })
+
+        result = gate_delta(
+            self.preference_delta(value="worked_examples", confidence=0.72),
+            learner,
+            {},
+        )
+
+        self.assertNotIn("preferences", result)
+        self.assertEqual(result["candidate_preferences"], [{
+            "key": "systems_concepts", "strategy": "worked_examples",
+            "evidence_count": 1, "confidence": 0.72,
+        }])
 
     def test_three_same_delta_signals_promote_one_preference(self):
         entry = self.preference_delta(confidence=0.70)["preferences"][0]

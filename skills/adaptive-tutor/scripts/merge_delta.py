@@ -10,12 +10,12 @@ from pathlib import Path
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from learner_store import DEFAULT_LEARNER, LearnerStore
-    from memory_gate import gate_delta
+    from memory_gate import gate_delta, gate_mastery_entries
     from model import EVIDENCE_RANK
     from validate_state import validate_delta, validate_learner, validate_mastery
 else:
     from .learner_store import DEFAULT_LEARNER, LearnerStore
-    from .memory_gate import gate_delta
+    from .memory_gate import gate_delta, gate_mastery_entries
     from .model import EVIDENCE_RANK
     from .validate_state import validate_delta, validate_learner, validate_mastery
 
@@ -26,7 +26,11 @@ MAX_EVIDENCE_COUNT = 3
 def merge_mastery(current, accepted_entries):
     """Return a new mastery document with accepted entries replacing concept state."""
     result = deepcopy(current)
-    for entry in accepted_entries:
+    canonical_entries = gate_mastery_entries(
+        [entry for entry in accepted_entries if entry["domain"] == current["domain"]],
+        {current["domain"]: current},
+    )
+    for entry in canonical_entries:
         concept = entry["concept"]
         previous = result["concepts"].get(concept, {})
         previous_evidence = previous.get("evidence", {})
@@ -65,9 +69,12 @@ def merge_learner(learner, accepted_delta):
             result[field].update(deepcopy(value))
 
     for entry in accepted_delta.get("candidate_preferences", []):
-        result["candidate_preferences"][entry["key"]] = {
+        candidate = {
             "evidence_count": entry["evidence_count"], "confidence": entry["confidence"],
         }
+        if "strategy" in entry:
+            candidate["strategy"] = entry["strategy"]
+        result["candidate_preferences"][entry["key"]] = candidate
     for entry in accepted_delta.get("preferences", []):
         key = entry["key"]
         result["preferences"][key] = {

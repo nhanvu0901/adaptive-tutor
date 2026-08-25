@@ -52,9 +52,12 @@ and session archive. Global context and self-report remain provisional and canno
 be emitted as verified mastery without demonstrated evidence.
 
 Treat inferred teaching preferences as candidates first. Repeated supporting
-evidence increases `candidate_preferences`; the deterministic gate promotes them
-only after sufficient support. A strong explicit user instruction may be stored as
-a durable preference immediately.
+evidence for the same strategy increases `candidate_preferences`; each new
+candidate records its strategy identity so evidence for distinct strategies never
+combines. Legacy candidates without a strategy remain valid and gain an identity
+when the next unambiguous supporting signal arrives. The deterministic gate
+promotes a candidate only after sufficient same-strategy support. A strong explicit
+user instruction may be stored as a durable preference immediately.
 
 Create the delta file in a temporary or current-workspace location, then run once
 per meaningful checkpoint:

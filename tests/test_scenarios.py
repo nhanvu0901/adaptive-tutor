@@ -132,7 +132,9 @@ class V1MemoryScenarioTests(unittest.TestCase):
 
         learner = LearnerStore(root).load_learner()
         self.assertEqual(learner["candidate_preferences"], {
-            "systems_concepts": {"evidence_count": 1, "confidence": 0.65}
+            "systems_concepts": {
+                "strategy": "visual_first", "evidence_count": 1, "confidence": 0.65,
+            }
         })
         self.assertEqual(learner["preferences"], {})
 

@@ -32,6 +32,27 @@ class StoreTests(unittest.TestCase):
         store.save_mastery("cloud", {"schema_version": 1, "domain": "cloud", "concepts": {}})
         self.assertEqual(store.load_mastery("nlp")["domain"], "nlp")
 
+    def test_distinct_domain_names_round_trip_without_overwrite(self):
+        root = temp_root(self)
+        store = LearnerStore(root)
+        for domain in ("C", "C++"):
+            store.save_mastery(domain, {
+                "schema_version": 1,
+                "domain": domain,
+                "concepts": {"syntax": {"state": "exposed", "confidence": 0.5}},
+            })
+
+        self.assertEqual(store.load_mastery("C")["domain"], "C")
+        self.assertEqual(store.load_mastery("C++")["domain"], "C++")
+        self.assertEqual(len(list((root / "mastery").glob("*.yaml"))), 2)
+
+    def test_simple_lowercase_domain_keeps_legacy_filename(self):
+        root = temp_root(self)
+        store = LearnerStore(root)
+        store.save_mastery("nlp", {"schema_version": 1, "domain": "nlp", "concepts": {}})
+
+        self.assertTrue((root / "mastery" / "nlp.yaml").is_file())
+
     def test_corrupt_existing_state_is_preserved(self):
         root = temp_root(self)
         root.mkdir(parents=True, exist_ok=True)

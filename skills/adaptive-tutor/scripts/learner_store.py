@@ -2,6 +2,7 @@
 
 import json
 import re
+from hashlib import sha256
 from copy import deepcopy
 from datetime import date as date_type
 from pathlib import Path
@@ -63,7 +64,14 @@ class LearnerStore:
         return slug
 
     def _mastery_path(self, domain):
-        return self.root / "mastery" / f"{self._slug(domain)}.yaml"
+        if not isinstance(domain, str) or not domain:
+            raise ValueError("mastery domain must be a non-empty string")
+        if re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", domain):
+            filename = f"{domain}.yaml"
+        else:
+            digest = sha256(domain.encode("utf-8")).hexdigest()
+            filename = f"_domain-{digest}.yaml"
+        return self.root / "mastery" / filename
 
     def load_learner(self):
         if not self.learner_path.exists():
