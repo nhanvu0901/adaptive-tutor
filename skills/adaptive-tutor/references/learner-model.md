@@ -55,9 +55,11 @@ Treat inferred teaching preferences as candidates first. Repeated supporting
 evidence for the same strategy increases `candidate_preferences`; each new
 candidate records its strategy identity so evidence for distinct strategies never
 combines. Legacy candidates without a strategy remain valid and gain an identity
-when the next unambiguous supporting signal arrives. The deterministic gate
-promotes a candidate only after sufficient same-strategy support. A strong explicit
-user instruction may be stored as a durable preference immediately.
+when the next unambiguous supporting signal arrives, but their identity-less count
+is not attributed to that strategy; the identified candidate starts from current
+evidence only. The deterministic gate promotes a candidate only after sufficient
+same-strategy support. A strong explicit user instruction may be stored as a
+durable preference immediately.
 
 Create the delta file in a temporary or current-workspace location, then run once
 per meaningful checkpoint:

@@ -147,10 +147,7 @@ def _gate_preferences(entries, learner):
             supporting = by_strategy[strategy]
             count = len(supporting)
             confidence = max(entry["confidence"] for entry in supporting)
-            if prior and (
-                prior.get("strategy") == strategy
-                or ("strategy" not in prior and len(by_strategy) == 1)
-            ):
+            if prior and prior.get("strategy") == strategy:
                 count += prior["evidence_count"]
                 confidence = max(confidence, prior["confidence"])
             identity_candidates.append({

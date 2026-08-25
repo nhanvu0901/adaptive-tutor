@@ -149,16 +149,20 @@ class GatePreferenceTests(unittest.TestCase):
             }],
         )
 
-    def test_third_supporting_signal_promotes_candidate(self):
+    def test_legacy_candidate_count_cannot_confirm_new_strategy(self):
         learner = learner_state(candidate_preferences={
             "systems_concepts": {"evidence_count": 2, "confidence": 0.65}
         })
         result = gate_delta(self.preference_delta(confidence=0.75), learner, {})
+
+        self.assertNotIn("preferences", result)
         self.assertEqual(
-            result["preferences"],
-            [{"key": "systems_concepts", "strategy": "visual_first", "confidence": 0.75}],
+            result["candidate_preferences"],
+            [{
+                "key": "systems_concepts", "strategy": "visual_first",
+                "evidence_count": 1, "confidence": 0.75,
+            }],
         )
-        self.assertNotIn("candidate_preferences", result)
 
     def test_distinct_inferred_strategies_do_not_combine_or_depend_on_order(self):
         visual = self.preference_delta(confidence=0.70)["preferences"][0]
