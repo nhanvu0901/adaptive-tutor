@@ -1,71 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 280" role="img" aria-labelledby="title description">
-  <title id="title">Adaptive Tutor learning loop</title>
-  <desc id="description">An animated learning loop: calibrate, map, practice, and prove.</desc>
+  <title id="title">Adaptive Tutor mastery map</title>
+  <desc id="description">An animated knowledge graph grows around a mastery indicator.</desc>
   <defs>
-    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0b1026"/>
-      <stop offset="55%" stop-color="#171540"/>
-      <stop offset="100%" stop-color="#10293c"/>
-    </linearGradient>
-    <linearGradient id="trail" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#36d8c7"/>
-      <stop offset="50%" stop-color="#9c7cff"/>
-      <stop offset="100%" stop-color="#5dd8ff"/>
-    </linearGradient>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="4" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#111827"/><stop offset="100%" stop-color="#172e43"/></linearGradient>
+    <radialGradient id="halo"><stop offset="0%" stop-color="#7dd3fc" stop-opacity=".25"/><stop offset="100%" stop-color="#7dd3fc" stop-opacity="0"/></radialGradient>
+    <linearGradient id="progress" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#a3e635"/></linearGradient>
+    <filter id="soft-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     <style>
-      .grid { stroke: #8a9ad9; stroke-width: .65; opacity: .14; }
-      .trail { stroke-dasharray: 7 11; animation: flow 2.8s linear infinite; }
-      .scanner { animation: sweep 5.4s ease-in-out infinite; }
-      .node { transform-box: fill-box; transform-origin: center; }
-      .node-one { animation: breathe 4.8s ease-in-out 0s infinite; }
-      .node-two { animation: breathe 4.8s ease-in-out 1.2s infinite; }
-      .node-three { animation: breathe 4.8s ease-in-out 2.4s infinite; }
-      .node-four { animation: breathe 4.8s ease-in-out 3.6s infinite; }
-      .spark { animation: blink 1.9s ease-in-out infinite; }
-      @keyframes flow { to { stroke-dashoffset: -72; } }
-      @keyframes breathe { 0%, 100% { opacity: .72; } 25%, 45% { opacity: 1; } }
-      @keyframes blink { 0%, 100% { opacity: .45; r: 4; } 50% { opacity: 1; r: 7; } }
-      @keyframes sweep { 0%, 100% { transform: translateX(-100px); opacity: 0; } 14% { opacity: .16; } 55% { transform: translateX(1020px); opacity: .08; } 72% { opacity: 0; } }
+      .signal { stroke: #7dd3fc; stroke-width: 1.5; stroke-linecap: round; stroke-dasharray: 2 9; animation: signal 3.8s linear infinite; }
+      .orbit { transform-box: fill-box; transform-origin: center; animation: orbit 18s linear infinite; }
+      .orbit-reverse { transform-box: fill-box; transform-origin: center; animation: orbit-reverse 25s linear infinite; }
+      .core-ring { stroke-dasharray: 169 220; animation: progress 4.5s ease-in-out infinite alternate; }
+      .learned { animation: learned 3.4s ease-in-out infinite; }
+      .new-node { animation: emerge 5s ease-in-out infinite; }
+      @keyframes orbit { to { transform: rotate(360deg); } }
+      @keyframes orbit-reverse { to { transform: rotate(-360deg); } }
+      @keyframes signal { to { stroke-dashoffset: -88; } }
+      @keyframes progress { from { stroke-dasharray: 110 220; } to { stroke-dasharray: 180 220; } }
+      @keyframes learned { 0%, 100% { opacity: .7; } 50% { opacity: 1; } }
+      @keyframes emerge { 0%, 24%, 100% { opacity: .22; } 42%, 72% { opacity: 1; } }
     </style>
   </defs>
-
-  <rect width="960" height="280" rx="20" fill="url(#background)"/>
-  <g class="grid">
-    <path d="M0 56H960M0 112H960M0 168H960M0 224H960"/>
-    <path d="M80 0V280M160 0V280M240 0V280M320 0V280M400 0V280M480 0V280M560 0V280M640 0V280M720 0V280M800 0V280M880 0V280"/>
+  <rect width="960" height="280" rx="20" fill="url(#sky)"/>
+  <path d="M0 224 C180 188 244 271 434 227 S716 173 960 221" fill="none" stroke="#36556b" stroke-width="1" opacity=".42"/>
+  <path d="M0 242 C157 202 310 274 510 233 S766 209 960 239" fill="none" stroke="#36556b" stroke-width="1" opacity=".25"/>
+  <text x="48" y="61" fill="#a3e635" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" letter-spacing="2.6">A TUTOR THAT REMEMBERS THE RIGHT THINGS</text>
+  <text x="48" y="121" fill="#f8fafc" font-family="ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif" font-size="50" font-weight="700">Adaptive Tutor</text>
+  <text x="48" y="156" fill="#b8cad8" font-family="ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif" font-size="17">Your knowledge map evolves with every explanation and application.</text>
+  <text x="48" y="218" fill="#7dd3fc" font-family="ui-monospace, monospace" font-size="11" letter-spacing="1.2">CALIBRATE  ·  PRACTICE  ·  EVIDENCE</text>
+  <g transform="translate(748 139)">
+    <circle r="116" fill="url(#halo)"/><circle r="76" fill="none" stroke="#36556b" stroke-width="1" opacity=".72"/><circle r="105" fill="none" stroke="#36556b" stroke-width="1" stroke-dasharray="2 8" opacity=".7"/>
+    <g class="orbit"><path class="signal" d="M0 -76 C46 -75 88 -44 101 0" fill="none"/><circle cx="0" cy="-76" r="8" fill="#18364d" stroke="#7dd3fc" stroke-width="2" filter="url(#soft-glow)"/><text x="0" y="-92" text-anchor="middle" fill="#b8cad8" font-family="ui-monospace, monospace" font-size="9">PREREQUISITE</text></g>
+    <g class="orbit-reverse"><path class="signal" d="M66 38 C31 75 -25 79 -67 43" fill="none"/><circle cx="66" cy="38" r="8" fill="#283f32" stroke="#a3e635" stroke-width="2" filter="url(#soft-glow)"/><text x="82" y="54" fill="#d9f99d" font-family="ui-monospace, monospace" font-size="9">PRACTICE</text></g>
+    <g class="orbit"><path class="signal" d="M-66 38 C-91 -7 -73 -57 -31 -70" fill="none"/><circle cx="-66" cy="38" r="8" fill="#322e57" stroke="#c4b5fd" stroke-width="2" filter="url(#soft-glow)"/><text x="-106" y="56" fill="#ddd6fe" font-family="ui-monospace, monospace" font-size="9">EVIDENCE</text></g>
+    <circle r="50" fill="#172c3d" stroke="#44657a" stroke-width="5"/><circle class="core-ring" r="35" fill="none" stroke="url(#progress)" stroke-width="6" stroke-linecap="round" transform="rotate(-90)" filter="url(#soft-glow)"/>
+    <text y="-4" text-anchor="middle" fill="#f8fafc" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" font-weight="700">MASTERY</text><text y="17" text-anchor="middle" fill="#a3e635" font-family="ui-monospace, monospace" font-size="12" letter-spacing="1">GROWING</text><circle class="learned" cx="-35" cy="-1" r="3" fill="#7dd3fc"/><circle class="new-node" cx="30" cy="22" r="4" fill="#a3e635" filter="url(#soft-glow)"/>
   </g>
-  <rect class="scanner" x="0" y="0" width="95" height="280" fill="#5dd8ff"/>
-
-  <text x="48" y="52" fill="#66e8d6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" letter-spacing="3">PERSONAL LEARNING, PROVEN BY EVIDENCE</text>
-  <text x="48" y="108" fill="#f4f5ff" font-family="ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif" font-size="52" font-weight="700">Adaptive Tutor</text>
-  <text x="48" y="142" fill="#c5cae8" font-family="ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif" font-size="16">Learn → Explain → Apply → Retain</text>
-
-  <path class="trail" d="M134 210 H266 M350 210 H482 M566 210 H698" fill="none" stroke="url(#trail)" stroke-width="2.5" stroke-linecap="round"/>
-
-  <g class="node node-one" filter="url(#glow)">
-    <rect x="48" y="178" width="172" height="64" rx="14" fill="#18234b" stroke="#36d8c7" stroke-width="1.4"/>
-    <text x="68" y="203" fill="#66e8d6" font-family="ui-monospace, monospace" font-size="11" letter-spacing="1.5">01</text>
-    <text x="68" y="226" fill="#f4f5ff" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="650">Calibrate</text>
-  </g>
-  <g class="node node-two" filter="url(#glow)">
-    <rect x="264" y="178" width="172" height="64" rx="14" fill="#241d51" stroke="#9c7cff" stroke-width="1.4"/>
-    <text x="284" y="203" fill="#b7a4ff" font-family="ui-monospace, monospace" font-size="11" letter-spacing="1.5">02</text>
-    <text x="284" y="226" fill="#f4f5ff" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="650">Map</text>
-  </g>
-  <g class="node node-three" filter="url(#glow)">
-    <rect x="480" y="178" width="172" height="64" rx="14" fill="#17294d" stroke="#5dd8ff" stroke-width="1.4"/>
-    <text x="500" y="203" fill="#8ae6ff" font-family="ui-monospace, monospace" font-size="11" letter-spacing="1.5">03</text>
-    <text x="500" y="226" fill="#f4f5ff" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="650">Practice</text>
-  </g>
-  <g class="node node-four" filter="url(#glow)">
-    <rect x="696" y="178" width="172" height="64" rx="14" fill="#18354a" stroke="#66e8d6" stroke-width="1.4"/>
-    <text x="716" y="203" fill="#66e8d6" font-family="ui-monospace, monospace" font-size="11" letter-spacing="1.5">04</text>
-    <text x="716" y="226" fill="#f4f5ff" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="650">Prove</text>
-  </g>
-  <circle class="spark" cx="902" cy="210" r="4" fill="#66e8d6" filter="url(#glow)"/>
-  <text x="888" y="257" fill="#8ee5db" font-family="ui-monospace, monospace" font-size="10" letter-spacing="1">SAVED</text>
 </svg>
