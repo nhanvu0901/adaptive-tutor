@@ -1,39 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 280" role="img" aria-labelledby="title description">
-  <title id="title">Adaptive Tutor mastery map</title>
-  <desc id="description">An animated knowledge graph grows around a mastery indicator.</desc>
+  <title id="title">Adaptive Tutor lesson journey</title>
+  <desc id="description">A glowing path travels from a question to confidence through four learning milestones.</desc>
   <defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#111827"/><stop offset="100%" stop-color="#172e43"/></linearGradient>
-    <radialGradient id="halo"><stop offset="0%" stop-color="#7dd3fc" stop-opacity=".25"/><stop offset="100%" stop-color="#7dd3fc" stop-opacity="0"/></radialGradient>
-    <linearGradient id="progress" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#a3e635"/></linearGradient>
-    <filter id="soft-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#151b2f"/><stop offset="100%" stop-color="#27233e"/></linearGradient>
+    <linearGradient id="ink" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f6bd60"/><stop offset="50%" stop-color="#f28482"/><stop offset="100%" stop-color="#84dcc6"/></linearGradient>
+    <filter id="glow" x="-40%" y="-80%" width="180%" height="260%"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     <style>
-      .signal { stroke: #7dd3fc; stroke-width: 1.5; stroke-linecap: round; stroke-dasharray: 2 9; animation: signal 3.8s linear infinite; }
-      .orbit { transform-box: fill-box; transform-origin: center; animation: orbit 18s linear infinite; }
-      .orbit-reverse { transform-box: fill-box; transform-origin: center; animation: orbit-reverse 25s linear infinite; }
-      .core-ring { stroke-dasharray: 169 220; animation: progress 4.5s ease-in-out infinite alternate; }
-      .learned { animation: learned 3.4s ease-in-out infinite; }
-      .new-node { animation: emerge 5s ease-in-out infinite; }
-      @keyframes orbit { to { transform: rotate(360deg); } }
-      @keyframes orbit-reverse { to { transform: rotate(-360deg); } }
-      @keyframes signal { to { stroke-dashoffset: -88; } }
-      @keyframes progress { from { stroke-dasharray: 110 220; } to { stroke-dasharray: 180 220; } }
-      @keyframes learned { 0%, 100% { opacity: .7; } 50% { opacity: 1; } }
-      @keyframes emerge { 0%, 24%, 100% { opacity: .22; } 42%, 72% { opacity: 1; } }
+      .path { stroke-dasharray: 820; stroke-dashoffset: 820; animation: write 7s ease-in-out infinite; }
+      .traveler { animation: travel 7s ease-in-out infinite; }
+      .note { opacity: 0; animation: note 7s ease-in-out infinite; }
+      .n1 { animation-delay: .6s; } .n2 { animation-delay: 1.7s; } .n3 { animation-delay: 2.8s; } .n4 { animation-delay: 3.9s; }
+      .ripple { transform-box: fill-box; transform-origin: center; animation: ripple 2.3s ease-out infinite; }
+      @keyframes write { 0%, 7% { stroke-dashoffset: 820; } 68%, 100% { stroke-dashoffset: 0; } }
+      @keyframes travel { 0%, 10% { transform: translate(0 0); opacity: 0; } 15% { opacity: 1; } 82%, 100% { transform: translate(700px -24px); opacity: 0; } }
+      @keyframes note { 0%, 18% { opacity: 0; transform: translateY(4px); } 25%, 74% { opacity: 1; transform: translateY(0); } 84%, 100% { opacity: 0; } }
+      @keyframes ripple { 0% { opacity: .9; transform: scale(.35); } 100% { opacity: 0; transform: scale(1.8); } }
     </style>
   </defs>
-  <rect width="960" height="280" rx="20" fill="url(#sky)"/>
-  <path d="M0 224 C180 188 244 271 434 227 S716 173 960 221" fill="none" stroke="#36556b" stroke-width="1" opacity=".42"/>
-  <path d="M0 242 C157 202 310 274 510 233 S766 209 960 239" fill="none" stroke="#36556b" stroke-width="1" opacity=".25"/>
-  <text x="48" y="61" fill="#a3e635" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" letter-spacing="2.6">A TUTOR THAT REMEMBERS THE RIGHT THINGS</text>
-  <text x="48" y="121" fill="#f8fafc" font-family="ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif" font-size="50" font-weight="700">Adaptive Tutor</text>
-  <text x="48" y="156" fill="#b8cad8" font-family="ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif" font-size="17">Your knowledge map evolves with every explanation and application.</text>
-  <text x="48" y="218" fill="#7dd3fc" font-family="ui-monospace, monospace" font-size="11" letter-spacing="1.2">CALIBRATE  ·  PRACTICE  ·  EVIDENCE</text>
-  <g transform="translate(748 139)">
-    <circle r="116" fill="url(#halo)"/><circle r="76" fill="none" stroke="#36556b" stroke-width="1" opacity=".72"/><circle r="105" fill="none" stroke="#36556b" stroke-width="1" stroke-dasharray="2 8" opacity=".7"/>
-    <g class="orbit"><path class="signal" d="M0 -76 C46 -75 88 -44 101 0" fill="none"/><circle cx="0" cy="-76" r="8" fill="#18364d" stroke="#7dd3fc" stroke-width="2" filter="url(#soft-glow)"/><text x="0" y="-92" text-anchor="middle" fill="#b8cad8" font-family="ui-monospace, monospace" font-size="9">PREREQUISITE</text></g>
-    <g class="orbit-reverse"><path class="signal" d="M66 38 C31 75 -25 79 -67 43" fill="none"/><circle cx="66" cy="38" r="8" fill="#283f32" stroke="#a3e635" stroke-width="2" filter="url(#soft-glow)"/><text x="82" y="54" fill="#d9f99d" font-family="ui-monospace, monospace" font-size="9">PRACTICE</text></g>
-    <g class="orbit"><path class="signal" d="M-66 38 C-91 -7 -73 -57 -31 -70" fill="none"/><circle cx="-66" cy="38" r="8" fill="#322e57" stroke="#c4b5fd" stroke-width="2" filter="url(#soft-glow)"/><text x="-106" y="56" fill="#ddd6fe" font-family="ui-monospace, monospace" font-size="9">EVIDENCE</text></g>
-    <circle r="50" fill="#172c3d" stroke="#44657a" stroke-width="5"/><circle class="core-ring" r="35" fill="none" stroke="url(#progress)" stroke-width="6" stroke-linecap="round" transform="rotate(-90)" filter="url(#soft-glow)"/>
-    <text y="-4" text-anchor="middle" fill="#f8fafc" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" font-weight="700">MASTERY</text><text y="17" text-anchor="middle" fill="#a3e635" font-family="ui-monospace, monospace" font-size="12" letter-spacing="1">GROWING</text><circle class="learned" cx="-35" cy="-1" r="3" fill="#7dd3fc"/><circle class="new-node" cx="30" cy="22" r="4" fill="#a3e635" filter="url(#soft-glow)"/>
-  </g>
+  <rect width="960" height="280" rx="20" fill="url(#paper)"/>
+  <g opacity=".17" stroke="#d9d4e7" stroke-width="1"><path d="M0 46H960M0 92H960M0 138H960M0 184H960M0 230H960"/><path d="M40 0V280M120 0V280M200 0V280M280 0V280M360 0V280M440 0V280M520 0V280M600 0V280M680 0V280M760 0V280M840 0V280M920 0V280"/></g>
+  <text x="48" y="53" fill="#f6bd60" font-family="ui-monospace, monospace" font-size="12" letter-spacing="2.4">THE LESSON MOVES WHEN UNDERSTANDING DOES</text>
+  <text x="48" y="106" fill="#fffaf4" font-family="ui-serif, Georgia, serif" font-size="50" font-weight="700">Adaptive Tutor</text>
+  <text x="48" y="138" fill="#d9d4e7" font-family="ui-sans-serif, system-ui, sans-serif" font-size="16">A guided trail from first question to usable confidence.</text>
+  <path class="path" d="M90 209 C170 170 228 236 305 208 S440 174 510 212 S646 250 710 194 S810 159 874 197" fill="none" stroke="url(#ink)" stroke-width="3" stroke-linecap="round" filter="url(#glow)"/>
+  <g class="traveler"><circle cx="90" cy="209" r="7" fill="#fffaf4" filter="url(#glow)"/><circle cx="90" cy="209" r="13" fill="none" stroke="#f6bd60" stroke-width="1.5" class="ripple"/></g>
+  <g class="note n1"><circle cx="90" cy="209" r="7" fill="#f6bd60"/><text x="90" y="249" text-anchor="middle" fill="#fffaf4" font-family="ui-monospace, monospace" font-size="11" letter-spacing="1">QUESTION</text></g>
+  <g class="note n2"><circle cx="305" cy="208" r="7" fill="#f28482"/><text x="305" y="177" text-anchor="middle" fill="#fffaf4" font-family="ui-monospace, monospace" font-size="11" letter-spacing="1">INSIGHT</text></g>
+  <g class="note n3"><circle cx="510" cy="212" r="7" fill="#cdb4db"/><text x="510" y="252" text-anchor="middle" fill="#fffaf4" font-family="ui-monospace, monospace" font-size="11" letter-spacing="1">CHALLENGE</text></g>
+  <g class="note n4"><circle cx="710" cy="194" r="7" fill="#84dcc6"/><text x="710" y="164" text-anchor="middle" fill="#fffaf4" font-family="ui-monospace, monospace" font-size="11" letter-spacing="1">CONFIDENCE</text></g>
+  <circle cx="874" cy="197" r="8" fill="#84dcc6" filter="url(#glow)"/><path d="M868 197l4 4 8-9" fill="none" stroke="#15222a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

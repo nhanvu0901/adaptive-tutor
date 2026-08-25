@@ -1,7 +1,7 @@
 <h1 align="center">Adaptive Tutor</h1>
 
 <p align="center">
-  <img src="docs/assets/adaptive-tutor-banner.svg" alt="Adaptive Tutor animated mastery map" width="960">
+  <img src="docs/assets/adaptive-tutor-banner.svg" alt="Adaptive Tutor animated lesson journey" width="960">
 </p>
 
 <p align="center">
