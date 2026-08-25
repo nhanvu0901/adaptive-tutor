@@ -1,6 +1,10 @@
 <h1 align="center">Adaptive Tutor</h1>
 
 <p align="center">
+  <img src="docs/assets/adaptive-tutor-banner.svg" alt="Adaptive Tutor learning loop: Calibrate, Map, Practice, Prove" width="960">
+</p>
+
+<p align="center">
   <strong>Personal tutoring that adapts—without mistaking memory for mastery.</strong>
 </p>
 
