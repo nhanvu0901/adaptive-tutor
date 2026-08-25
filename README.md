@@ -4,6 +4,8 @@
   <img src="docs/assets/adaptive-tutor-banner.svg" alt="Adaptive Tutor animated lesson journey" width="960">
 </p>
 
+<p align="center">Released under the <a href="LICENSE">MIT License</a>.</p>
+
 <p align="center">
   <strong>Personal tutoring that adapts—without mistaking memory for mastery.</strong>
 </p>
