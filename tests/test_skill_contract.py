@@ -10,16 +10,38 @@ LEARNER_MODEL = (ROOT / "skills/adaptive-tutor/references/learner-model.md").rea
 PEDAGOGY = (ROOT / "skills/adaptive-tutor/references/pedagogy.md").read_text(encoding="utf-8")
 
 
+def permission_gate_section(skill):
+    """Return only the permission hard-gate section, excluding later headings."""
+    heading = "## permission and context hard gate"
+    normalized_skill = skill.lower()
+    start = normalized_skill.index(heading)
+    next_heading = normalized_skill.find("\n## ", start + len(heading))
+    if next_heading == -1:
+        next_heading = len(skill)
+    return " ".join(normalized_skill[start:next_heading].split())
+
+
 class SkillContractTests(unittest.TestCase):
     def test_permission_gate_precedes_active_global_context_read(self):
-        skill = SKILL.lower()
-        gate_start = skill.index("## permission and context hard gate")
-        gate = " ".join(skill[gate_start:].split())
+        gate = permission_gate_section(SKILL)
         ask_index = gate.index("ask the exact permission request")
         no_read_index = gate.index("do not actively open global files")
         self.assertLess(ask_index, no_read_index)
         self.assertIn("before reading any global claude/codex context or memory", gate)
         self.assertIn("only for learning personalization", gate)
+
+    def test_permission_gate_does_not_use_later_section_text(self):
+        fixture = """## Permission and context hard gate
+Before reading any global Claude/Codex context or memory, ask the exact permission request.
+Use it only for learning personalization.
+
+## Later section
+Do not actively open global files until consent is granted.
+"""
+        gate = permission_gate_section(fixture)
+        self.assertNotIn("do not actively open global files", gate)
+        with self.assertRaises(ValueError):
+            gate.index("do not actively open global files")
 
     def test_denial_has_onboarding_fallback(self):
         self.assertIn("five-question onboarding", SKILL.lower())
