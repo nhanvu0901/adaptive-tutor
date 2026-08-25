@@ -1,115 +1,143 @@
-# Adaptive Tutor
+<h1 align="center">Adaptive Tutor</h1>
 
-## What it is
+<p align="center">
+  <strong>Personal tutoring that adapts—without mistaking memory for mastery.</strong>
+</p>
 
-Adaptive Tutor is a portable Agent Skills pack for evidence-driven, personalized
-tutoring. It contains `adaptive-tutor`, which runs the lesson workflow, and
-`learn-verify`, which verifies uncertain or material factual claims before they
-are taught as fact. V1 is terminal-native and works with Claude Code and Codex.
+<p align="center">Portable Agent Skills for Claude Code and Codex.</p>
 
-For background, see the [referenced YouTube video](https://www.youtube.com/watch?v=kzcI5F4tGiU&t=797s).
+<p align="center">
+  <a href="#quick-install">Install</a> ·
+  <a href="#start-learning">Start learning</a> ·
+  <a href="#the-learning-loop">Learning loop</a> ·
+  <a href="#privacy-by-default">Privacy</a>
+</p>
 
-## Why it differs from a normal AI tutor
+Adaptive Tutor combines an evidence-driven teaching workflow with a small,
+shared local learner model. It calibrates first, teaches one meaningful concept
+at a time, asks for proof, and saves only durable progress at semantic
+checkpoints.
 
-The tutor calibrates rather than trusting a claimed level, builds a dynamic
-prerequisite map, teaches one unresolved node at a time, and asks for explanation,
-application, or transfer evidence before advancing mastery. A correct multiple
-choice answer or self-report alone cannot prove higher mastery. It records hint
-dependence and contradictions so the next lesson can revisit weak foundations.
+For background, watch the [referenced video](https://www.youtube.com/watch?v=kzcI5F4tGiU&t=797s).
 
-## Privacy and permission
+---
 
-Before actively reading global Claude/Codex context or memory, Adaptive Tutor asks
-for explicit permission. `allow_once` applies only to the current learning
-session; `allow_and_remember` persists only that permission decision; and `deny`
-means it does not read global context and instead uses onboarding plus learner
-state. Supplied conversation/project context does not authorize opening more
-global files. Context and self-report are provisional personalization signals,
-never proof of mastery, and unrelated or sensitive data is not copied into learner
-storage.
+## Quick install
 
-## How memory stays cost-effective
-
-The shared store has three tiers: a compact learner profile, domain-scoped mastery
-files loaded only when relevant, and cold session archives that are not loaded by
-default. Working evidence stays in the active lesson. At semantic checkpoints—such
-as completing a concept, correcting a misconception, repeating a preference, or
-ending a lesson—the tutor writes a bounded JSON delta. The deterministic merge
-script validates, gates, and merges only eligible changes instead of rewriting
-memory after every prompt.
-
-## Install with npx skills
-
-Replace `<owner>/<repo>` with this repository's GitHub slug. The common `skills`
-CLI installs Agent Skills into agent-specific locations; let it do that routing.
+Install both skills for every detected agent:
 
 ```bash
-npx skills add <owner>/<repo> -g --all
-npx skills add <owner>/<repo> --list
+npx skills add nhanvu0901/adaptive-tutor -g --all
 ```
 
-The second command lists the available `adaptive-tutor` and `learn-verify` skills
-without installing them. To install a local checkout while developing, the
-verified CLI command is:
+See what the package contains before installing:
+
+```bash
+npx skills add nhanvu0901/adaptive-tutor --list
+```
+
+For local development, list the skills in a checkout:
 
 ```bash
 npx skills add . --list
 ```
 
-For a noninteractive copied Codex install, use:
+The `skills` CLI installs skill files into agent-specific locations. Do not copy
+the learner store into Claude or Codex directories yourself.
 
-```bash
-npx skills add . -g --copy --agent codex --skill '*' -y
+## Start learning
+
+After installation, ask naturally:
+
+```text
+Use the adaptive-tutor skill to teach me the foundations of SQL joins.
 ```
 
-Do not manually copy the learner store into Claude or Codex skill directories.
-Those are installation locations; the learner store is shared local state.
+Or invoke the skill explicitly:
 
-## Claude Code usage
+```text
+$adaptive-tutor Teach me the foundations of SQL joins.
+```
 
-Install through `npx skills`, then ask Claude Code to teach, help you study, or
-practice a topic. The `adaptive-tutor` skill requests the context permission
-before any active global-context read, uses native choice prompts when available,
-and invokes `learn-verify` for uncertain, current, niche, contested, or materially
-important teaching claims.
+The tutor asks before actively reading global context, uses that context only for
+learning personalization, and falls back to onboarding when access is denied or
+unavailable.
 
-## Codex usage
+## The learning loop
 
-Install through `npx skills`, then ask Codex to teach, explain, quiz, or help you
-practice a topic. It follows the same portable workflow, permission gate, learner
-state, and evidence standards as Claude Code; only the host's prompt rendering may
-differ.
+```mermaid
+flowchart LR
+    A[Permission] --> B[Calibrate]
+    B --> C[Map prerequisites]
+    C --> D[Teach one node]
+    D --> E[Prove understanding]
+    E --> F[Checkpoint evidence]
+    F --> G{Next node?}
+    G -->|Yes| D
+    G -->|No| H[Revisit when needed]
+```
 
-## Shared local learner state
+The map changes with the learner. A missed prerequisite reopens the relevant
+node; a correct multiple-choice answer alone never proves explanation,
+application, or transfer mastery.
 
-By default, learner state is local to `~/.adaptive-tutor/`:
+## What is included
 
-- `LEARNER.yaml` is the compact profile and persisted consent decision.
-- `mastery/<domain>.yaml` holds a domain-specific mastery index.
-- `sessions/YYYY-MM-DD-topic.md` is a cold session archive.
+| Skill | Purpose |
+| --- | --- |
+| `adaptive-tutor` | Permission-aware tutoring, calibration, knowledge maps, one-node teaching, evidence, and checkpointed memory. |
+| `learn-verify` | Verifies uncertain, current, niche, contested, or material claims before they are taught as fact. |
 
-This location is deliberately outside agent-specific skill directories, so Claude
-Code and Codex use the same learner history on the same machine. During a semantic
-checkpoint, create the bounded delta in a temporary or current-workspace location
-and run:
+## Privacy by default
+
+Before it opens any global Claude/Codex context or memory, Adaptive Tutor asks
+for explicit permission. `allow_once` is session-only;
+`allow_and_remember` stores only the permission choice; and `deny` starts or
+continues with onboarding plus shared learner state.
+
+Context and self-report are hypotheses, not proof of mastery. Only
+learning-relevant signals may be retained; unrelated or sensitive information is
+discarded.
+
+## Memory that stays small
+
+Learner state lives locally at `~/.adaptive-tutor/` and is shared by Claude Code
+and Codex on the same machine:
+
+```text
+~/.adaptive-tutor/
+├── LEARNER.yaml               # compact profile and consent decisions
+├── mastery/<domain>.yaml      # relevant domain only
+└── sessions/<date>-<topic>.md # cold lesson archive
+```
+
+The tutor holds day-to-day evidence in the active lesson. At a semantic
+checkpoint—such as completing a concept, correcting a misconception, or ending a
+lesson—it writes a bounded delta and applies it deterministically:
 
 ```bash
 python <skill-dir>/scripts/merge_delta.py --delta <checkpoint-delta.json>
 ```
 
-Delete the temporary delta only after a successful merge; retain it if merging
-fails so it can be diagnosed or retried.
+The gate accepts only evidence-backed, useful changes. It does not rewrite
+persistent memory after every prompt.
+
+## Claude Code and Codex
+
+Both agents use the same learner state and teaching rules. When a host exposes a
+native choice picker, the skill prefers it for permission prompts and calibration
+questions; otherwise it uses numbered plain-text choices. Higher mastery still
+requires open explanation, application, or transfer work.
 
 ## What V1 does not do
 
-V1 does not provide a web UI, synchronise learner data across machines, treat
-global context as mastery proof, persist every turn, or import external learner
-profiles through claim verification. It does not bypass the context-permission
-gate.
+V1 is deliberately terminal-native. It does not include a web dashboard, cloud
+database, background daemon, vector database, cross-machine sync, full spaced
+repetition scheduler, or automatic edits to your global agent files.
 
-## Development/tests
+## Development
 
-Run from the repository root:
+Run these commands from the repository root:
 
 ```bash
 python -m unittest discover -s tests -v
@@ -118,12 +146,9 @@ python skills/adaptive-tutor/scripts/merge_delta.py --help
 npx skills add . --list
 ```
 
-The packaging tests also prove that each runtime file named by
-`adaptive-tutor/SKILL.md` is included inside that skill and that the merge CLI can
-run from an arbitrary current working directory.
+The packaging suite verifies that the installed skill is self-contained and that
+the checkpoint CLI works from an arbitrary directory.
 
-## Third-party attribution
+## License
 
-See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The project adapts ideas and
-may adapt portions of skill text from `vasanthsreeram/Alvarmethod` under its MIT
-license; the notice records the retrieved revision and attribution requirements.
+See [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
