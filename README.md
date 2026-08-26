@@ -4,6 +4,10 @@
   <img src="docs/assets/adaptive-tutor-banner.svg" alt="Adaptive Tutor animated lesson journey" width="960">
 </p>
 
+<p align="center">
+  <a href="https://skills.sh/nhanvu0901/adaptive-tutor"><img src="https://skills.sh/b/nhanvu0901/adaptive-tutor" alt="skills.sh"></a>
+</p>
+
 <p align="center">Released under the <a href="LICENSE">MIT License</a>.</p>
 
 <p align="center">
