@@ -1,3 +1,4 @@
+import json
 import re
 import shutil
 import subprocess
@@ -10,6 +11,21 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class PackagingTests(unittest.TestCase):
+    def test_plugin_manifests_expose_the_portable_skills(self):
+        manifest_paths = (
+            ROOT / ".codex-plugin" / "plugin.json",
+            ROOT / ".claude-plugin" / "plugin.json",
+        )
+        for path in manifest_paths:
+            self.assertTrue(path.is_file(), path)
+            manifest = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(manifest["name"], "adaptive-tutor")
+            self.assertEqual(manifest["version"], "1.0.0")
+            self.assertEqual(manifest["skills"], "./skills")
+            self.assertEqual(manifest["repository"], "https://github.com/nhanvu0901/adaptive-tutor")
+            self.assertEqual(manifest["license"], "MIT")
+            self.assertTrue(manifest["description"])
+
     def test_expected_skills_have_agent_skill_frontmatter(self):
         for name in ("adaptive-tutor", "learn-verify"):
             path = ROOT / "skills" / name / "SKILL.md"

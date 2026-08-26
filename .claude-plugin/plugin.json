@@ -1,0 +1,21 @@
+{
+  "name": "adaptive-tutor",
+  "version": "1.0.0",
+  "description": "Evidence-driven personalized tutoring for Codex and Claude Code.",
+  "author": {
+    "name": "Nhan Vu",
+    "url": "https://github.com/nhanvu0901"
+  },
+  "homepage": "https://github.com/nhanvu0901/adaptive-tutor",
+  "repository": "https://github.com/nhanvu0901/adaptive-tutor",
+  "license": "MIT",
+  "keywords": [
+    "education",
+    "learning",
+    "tutoring",
+    "agent-skills",
+    "codex",
+    "claude-code"
+  ],
+  "skills": "./skills"
+}

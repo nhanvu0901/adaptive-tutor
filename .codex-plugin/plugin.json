@@ -1,0 +1,39 @@
+{
+  "name": "adaptive-tutor",
+  "version": "1.0.0",
+  "description": "Evidence-driven personalized tutoring for Codex and Claude Code.",
+  "author": {
+    "name": "Nhan Vu",
+    "url": "https://github.com/nhanvu0901"
+  },
+  "homepage": "https://github.com/nhanvu0901/adaptive-tutor",
+  "repository": "https://github.com/nhanvu0901/adaptive-tutor",
+  "license": "MIT",
+  "keywords": [
+    "education",
+    "learning",
+    "tutoring",
+    "agent-skills",
+    "codex",
+    "claude-code"
+  ],
+  "skills": "./skills",
+  "interface": {
+    "displayName": "Adaptive Tutor",
+    "shortDescription": "Evidence-driven tutoring that adapts to demonstrated understanding.",
+    "longDescription": "Calibrates knowledge, teaches one concept at a time, checks explanation and application, and stores only meaningful progress locally.",
+    "developerName": "Nhan Vu",
+    "category": "Education",
+    "capabilities": [
+      "Skills",
+      "Local learner state"
+    ],
+    "websiteURL": "https://github.com/nhanvu0901/adaptive-tutor",
+    "defaultPrompt": [
+      "Teach me the foundations of SQL joins.",
+      "Help me learn Python functions step by step.",
+      "Teach and respond in English only."
+    ],
+    "brandColor": "#84DCC6"
+  }
+}
